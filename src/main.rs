@@ -17,6 +17,7 @@ use tokio_schedule::{every, Job};
 
 extern crate weeklyemergencymeeting as wem;
 use wem::commands::{change_message::CHANGE_MESSAGE_COMMAND, show_message::SHOW_MESSAGE_COMMAND};
+use wem::core::announce::say_announce;
 use wem::store::message_store::MessageStore;
 use wem::utils::week_str_to_week_day;
 
@@ -73,6 +74,11 @@ async fn main() {
   let c = ChannelId(c_id.parse().unwrap());
   let hour = section.get("hour").unwrap().parse().unwrap();
   let minute = section.get("minute").unwrap().parse().unwrap();
+  let reacts = section
+    .get("reacts")
+    .unwrap()
+    .split(",")
+    .collect::<Vec<&str>>();
 
   // set initial message from conf
   let mes = section.get("message").unwrap();
@@ -104,25 +110,7 @@ async fn main() {
     .week()
     .on(w)
     .at(hour, minute, 00)
-    .perform(|| async {
-      let mes_lock = {
-        let data_read = data.read().await;
-        data_read
-          .get::<MessageStore>()
-          .expect("Expected MessageStore in TypeMap.")
-          .clone()
-      };
-      let mes = mes_lock.read().await;
-      println!("Start announce: {:?}", mes);
-      match c.say(&http, mes).await {
-        Ok(mes) => {
-          println!("send message: {:?}", mes);
-        }
-        Err(err) => {
-          println!("send message: {:?}", err);
-        }
-      }
-    });
+    .perform(|| say_announce(&c, &reacts, &data, &http));
 
   tokio::select! {
     _ = job => {

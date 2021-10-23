@@ -7,8 +7,16 @@
     {
       "type": "lldb",
       "request": "launch",
-      "name": "Debug",
+      "name": "Debug(Linux)",
       "program": "${workspaceFolder}/target/debug/weeklyemergencymeeting",
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug(Windows)",
+      "program": "${workspaceFolder}/target/debug/weeklyemergencymeeting.exe",
       "args": [],
       "cwd": "${workspaceFolder}"
     }
